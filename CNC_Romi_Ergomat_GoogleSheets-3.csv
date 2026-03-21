@@ -1,0 +1,90 @@
+﻿==== PAINEL DE CONTROLE ====
+
+Parâmetro,Valor,Unidade,Máquina,Descrição
+Material da Peça,Aço 1045,—,Ambas,Tipo de material usinado
+Ferramenta Ativa,1,—,Ambas,Nº da ferramenta no magazine
+Offset (H/D),1,—,Ambas,Corretor dimensional
+Tipo de Operação,Desbaste,—,Ambas,Modo de usinagem
+Origem G54 – X,0,mm,ROMI D600,Coordenada X
+Origem G54 – Y,0,mm,ROMI D600,Coordenada Y
+Origem G54 – Z,0,mm,ROMI D600,Coordenada Z
+Origem G54 – X,0,mm,Ergomat TND200,Coordenada X
+Origem G54 – Z,0,mm,Ergomat TND200,Coordenada Z
+RPM Máx. Spindle,6000,RPM,ROMI D600,Limite máximo do spindle
+RPM Máx. Spindle,3500,RPM,Ergomat TND200,Limite máximo do spindle
+Controle CNC,FANUC,—,ROMI D600,Sistema de controle
+Controle CNC,Fagor / ISO,—,Ergomat TND200,Sistema de controle
+
+==== SEQUÊNCIA DE OPERAÇÕES ====
+
+Seq.,Operação,Código G,X (mm),Y (mm),Z (mm),Prof. Q,Avanço F,Rot. S,Comentário,Status
+10,Posicionamento rápido,G00,0,0,50,,,,Ponto seguro,OK
+20,Ligar spindle,M03,,,,,,1200,Ligar refrigeração M08,OK
+30,Aproximação rápida,G00,100,50,5,,,,Sobre a peça,OK
+40,Furação simples,G81,100,50,-20,,150,1200,Furo Ø10 raso,OK
+50,Furação profunda peck,G83,100,80,-50,5,120,1000,Q=bicada 5mm,OK
+60,Rosqueamento M10,G84,120,60,-25,,175,800,Passo 1.75mm,OK
+70,Contorno linear,G01,150,100,-5,,200,1500,Acabamento lateral,OK
+80,Arco horário R15,G02,180,120,-5,,180,1500,Interpolação circular,OK
+90,Recuo seguro,G00,0,0,50,,,,Afasta ferramenta,OK
+100,Desliga refrigeração,M09,,,,,,,,OK
+110,Para spindle,M05,,,,,,,,OK
+120,Fim de programa,M30,,,,,,,Reset + Rewind,OK
+
+==== CALCULADORA ====
+
+Descrição,Valor,Unidade,Instrução
+Velocidade de Corte (Vc),150,m/min,Digite o valor recomendado
+Diâmetro da Ferramenta (D),20,mm,Digite o diâmetro
+Rotação calculada (S),FORMULA,RPM,S = (Vc×1000) / (π×D)
+Avanço por Dente (fz),0.1,mm/dente,Digite o valor
+Nº de Dentes (Z),2,—,Nº de arestas cortantes
+Avanço calculado (F),FORMULA,mm/min,F = fz × Z × S
+Profundidade de Corte (ap),2,mm,Profundidade axial
+Largura de Corte (ae),5,mm,Engajamento radial
+Potência estimada,FORMULA,kW,Estimativa simplificada
+
+==== BIBLIOTECA DE CICLOS ====
+
+Ciclo,Nome,Sintaxe,Exemplo,Explicação,Máquina
+G81,Furação Simples,G81 X_ Y_ Z_ R_ F_,G81 X50 Y30 Z-25 R5 F150,Fura e retorna rapidamente. Ideal para furos rasos sem quebra de cavaco.,ROMI D600
+G83,Furação c/ Peck,G83 X_ Y_ Z_ R_ Q_ F_,G83 X50 Y30 Z-50 R5 Q5 F120,Para furos profundos. Q = peck (profund. de cada bicada). Remove cavaco.,ROMI D600
+G84,Rosqueamento,G84 X_ Y_ Z_ R_ F_,G84 X50 Y30 Z-25 R5 F175,F = RPM × Passo. Spindle inverte automaticamente no fundo.,ROMI D600
+G73,Furação c/ quebra,G73 X_ Y_ Z_ R_ Q_ F_,G73 X50 Y30 Z-40 R5 Q3 F150,Semelhante ao G83 mas retorno parcial. Mais rápido p/ materiais friáveis.,ROMI D600
+G76,Mandrilamento fino,G76 X_ Y_ Z_ R_ Q_ P_ F_,G76 X50 Z-30 R5 Q0.1 P500 F100,Mandrilamento de precisão. P=tempo espera. Q=deslocamento na saída.,ROMI D600
+G85,Alargamento,G85 X_ Y_ Z_ R_ F_,G85 X50 Y30 Z-20 R5 F80,Entra e sai com avanço. Acabamento suave do furo.,ROMI D600
+G01,Interp. Linear Torno,G01 X_ Z_ F_,G01 X50 Z-30 F0.2,Torneamento linear controlado. Base do ciclo no Ergomat.,Ergomat TND200
+G90,Ciclo Torneamento,G90 X_ Z_ F_,G90 X48 Z-50 F0.2,Ciclo simples de desbaste externo/interno (ISO).,Ergomat TND200
+G92,Ciclo Rosqueamento,G92 X_ Z_ F_,G92 X29.5 Z-30 F1.5,F = passo da rosca. Repetir com X decrescente para cada passada.,Ergomat TND200
+G96,Vel. Corte Constante,G96 S_ M03,G96 S200 M03,RPM varia para manter Vc constante. Ótimo para acabamento.,Ergomat TND200
+G97,RPM Fixo,G97 S_ M03,G97 S1200 M03,RPM constante. Usar para roscas e furação.,Ambas
+G02,Arco Horário,G02 X_ Z_ R_ F_,G02 X40 Z-20 R10 F120,Interpolação circular horária. Use R ou I/K.,Ambas
+G03,Arco Anti-Horário,G03 X_ Z_ R_ F_,G03 X40 Z-20 R10 F120,Interpolação circular anti-horária.,Ambas
+
+==== PROGRAMA G-CODE ====
+
+G-Code,Comentário
+%,Início do arquivo
+O0001,Número do programa
+(PROG: ROMI D600 - CNC),Comentário descritivo
+G90 G54 G17 G40 G80,Linha de segurança
+G21,Unidade: milímetros
+T1 M06,Chama ferramenta
+G43 H1,Corretor de comprimento
+M08,Liga refrigeração
+G00 X0 Y0 Z50 (Ponto seguro),OK
+M03 S1200 (Ligar refrigeração M08),OK
+G00 X100 Y50 Z5 (Sobre a peça),OK
+G81 X100 Y50 Z-20 F150 S1200 (Furo Ø10 raso),OK
+G83 X100 Y80 Z-50 Q5 F120 S1000 (Q=bicada 5mm),OK
+G84 X120 Y60 Z-25 F175 S800 (Passo 1.75mm),OK
+G01 X150 Y100 Z-5 F200 S1500 (Acabamento lateral),OK
+G02 X180 Y120 Z-5 F180 S1500 (Interpolação circular),OK
+G00 X0 Y0 Z50 (Afasta ferramenta),OK
+M09,OK
+M05,OK
+M30 (Reset + Rewind),OK
+M09,Desliga refrigeração
+M05,Para spindle
+M30,Fim + Rewind
+%,
