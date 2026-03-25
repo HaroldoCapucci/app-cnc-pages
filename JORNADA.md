@@ -9,7 +9,8 @@ Sou engenheiro CNC e estou migrando para o mundo do desenvolvimento de software.
 - **Aider**: assistente de programação que integra Claude.
 - **Claude (Anthropic)**: modelo de IA que gera e edita código.
 - **Python, Git, Rust**: linguagens e ferramentas essenciais.
-/## Desafios enfrentados
+
+## Desafios enfrentados
 - Instalar `aider-chat` no Termux com Python 3.13 exigiu compilar `numpy` e `tiktoken`, o que foi um grande obstáculo.
 - Aprendi sobre ambientes virtuais, `--system-site-packages`, e a importância de usar versões de Python compatíveis.
 - Descobri que o GitHub Codespaces resolve esses problemas de build em minutos, permitindo focar no que importa: o código.
@@ -38,4 +39,9 @@ Sou engenheiro CNC e estou migrando para o mundo do desenvolvimento de software.
 
 *Esta jornada está apenas começando.*
 
+git add JORNADA.md
+git commit -m "docs: adiciona JORNADA.md com minha experiência usando IA"
+git push origin main
+
+o
 
